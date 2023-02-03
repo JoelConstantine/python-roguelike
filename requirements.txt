@@ -1,0 +1,5 @@
+cffi==1.15.1
+numpy==1.19.5
+pycparser==2.21
+tcod==13.0.0
+typing-extensions==4.1.1
