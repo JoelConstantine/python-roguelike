@@ -1,3 +1,5 @@
+"""All of this is based on the TCOD roguelike tutorial (2020) found at http://rogueliketutorials.com"""
+
 
 import copy
 import traceback
@@ -10,6 +12,7 @@ import entity_factories
 from procgen import generate_dungeon
 
 def main():
+    # Setup initial variables for the game
     screen_width = 80
     screen_height = 50
 
@@ -22,14 +25,18 @@ def main():
     max_monsters_per_room = 2
     max_items_per_room = 2
 
+    # Load the provided tileset
     tileset = tcod.tileset.load_tilesheet(
         "dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
 
+    # Create the player
     player = copy.deepcopy(entity_factories.player)
 
+    # Initialize the engine, passing in the player
     engine = Engine(player=player)
 
+    # Create the dungeon map for the engine
     engine.game_map = generate_dungeon(
         max_rooms=max_rooms, 
         room_min_size=room_min_size, 
@@ -47,6 +54,7 @@ def main():
         "Hello and welcome, adventurer, to yet another dungeon!", color.welcome_text
     )
 
+    # Create a new tcod tutorial with our settings and tileset, begin the gameloop
     with tcod.context.new_terminal(
         screen_width,
         screen_height,
@@ -56,6 +64,16 @@ def main():
     ) as context:
         root_console = tcod.Console(screen_width, screen_height, order="F")
         while True:
+            """
+            This is the basic game engine loop
+            
+            First the console is cleared,
+            then the engine's event_handler render its current state
+            
+            Afterwards, the engine then waits for and responds to player input
+            before updating the loop
+            """
+            
             root_console.clear()
             engine.event_handler.on_render(console=root_console)
             context.present(root_console)
