@@ -3,3 +3,6 @@ class Impossible(Exception):
     
     The reason is given as the exception message
     """
+    
+class QuitWithoutSaving(Exception):
+    """Can be raised to exit the game without automatically saving"""
