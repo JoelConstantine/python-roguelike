@@ -57,19 +57,22 @@ def main() -> None:
                     for event in tcod.event.wait():
                         context.convert_event(event)
                         handler = handler.handle_events(event)
+                except exceptions.QuitWithoutSaving:
+                    raise 
                 except Exception: # Handle exceptions in game
                     traceback.print_exc() # Print erro to stderr
                     # Then print the error to the message log
                     if isinstance(handler, input_handlers.EventHandler):
                         handler.engine.message_log.add_message(traceback.format_exc(), color.error)
         except exceptions.QuitWithoutSaving:
-            raise
+            print("System exit")
+            raise 
         except SystemExit: # Save and quit
             save_game(handler, "savegame.sav")
-            raise
+            raise 
         except BaseException:
             save_game(handler, "savegame.sav")
-            raise
+            raise 
 
 
 if __name__ == "__main__":
