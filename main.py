@@ -5,6 +5,8 @@ import traceback
 
 import tcod
 
+import os, pygame
+
 import color
 import exceptions
 import input_handlers
@@ -17,9 +19,16 @@ def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
         print("Game saved")
 
 def main() -> None:
+
+    pygame.init()
+    screen = pygame.display.set_mode((1280,800), pygame.SCALED)
+    pygame.display.set_caption("TESTING")
+
     # Setup initial variables for the game
     screen_width = 80
     screen_height = 50
+
+    # tiles x = 40, y = 30
 
     # Load the provided tileset
     tileset = tcod.tileset.load_tilesheet(
@@ -27,7 +36,7 @@ def main() -> None:
     )
     
     handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
-
+    
     # Create a new tcod tutorial with our settings and tileset, begin the gameloop
     with tcod.context.new_terminal(
         screen_width,
@@ -51,7 +60,9 @@ def main() -> None:
                 
                 root_console.clear()
                 handler.on_render(console=root_console)
+                handler.render_pygame(surface=screen)
                 context.present(root_console)
+                pygame.display.flip()
 
                 try:
                     for event in tcod.event.wait():

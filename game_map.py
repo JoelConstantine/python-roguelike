@@ -5,12 +5,17 @@ from typing import Iterable, Iterator, Optional, TYPE_CHECKING
 import numpy as np # type: ignore
 from tcod.console import Console
 
+import pygame
+
 from entity import Actor, Item
 import tile_types
+
+from render_functions import load_image
 
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Entity
+    
 
 class GameMap:
     def __init__(
@@ -33,6 +38,8 @@ class GameMap:
     @property
     def gamemap(self) -> GameMap:
         return self
+
+
 
     @property
     def actors(self) -> Iterator[Actor]:
@@ -96,6 +103,71 @@ class GameMap:
                 console.print(
                     x=entity.x, y=entity.y, string=entity.char, fg=entity.color
                 )
+
+    def render_window(self, surface: pygame.surface.Surface) -> None:
+        scale = 2
+
+
+        visible_tiles = np.select(
+            condlist=[self.visible, self.explored],
+            choicelist=[self.tiles["filepath"], self.tiles["filepath"]],
+            default=""
+        )
+
+        player_x = self.engine.player.x
+        player_y = self.engine.player.y
+
+        camera_width = 930
+        camera_height = 640
+
+
+        game_map = pygame.Surface((1280 * scale, 800 * scale))
+        camera = pygame.Surface((camera_width,camera_height))
+
+        window_tile_height = 30
+        window_tile_width = 50
+
+        # window_visible = visible_tiles[x-10:y-10:x+10:y+10]
+        
+        starting_x_index = min([0,  player_x - (window_tile_width // 2)])
+        starting_y_index = min([0, player_y - (window_tile_height // 2)])
+        
+    
+
+        black = 0, 0, 0
+        surface.fill(black)
+        game_map.fill(black)
+
+        tile_size = 16 * scale
+        x_offset = 0
+
+        for x in range(len(visible_tiles)):
+             for y in range(len(visible_tiles[x])):
+                 current_tile = visible_tiles[x][y]
+                 if current_tile != "":
+                    img, rect = load_image(current_tile, scale=scale)
+                    surface.set_alpha()
+                    game_map.blit(img, (x * tile_size, y * tile_size))
+
+        entities_sorted_for_rendering = sorted(
+            self.entities, key=lambda x: x.render_order.value
+        )
+
+        for entity in entities_sorted_for_rendering:
+            # Only print entities that are in the FOV
+            if self.visible[entity.x, entity.y]:
+                if entity.sprite != "":
+                    img, rect = load_image(entity.sprite, colorkey=-1, scale=scale)
+                    game_map.blit(img, (entity.x * tile_size, entity.y * tile_size))
+
+        camera.fill(black)
+        camera.blit(
+            game_map, 
+            (0,0), 
+            (player_x * tile_size - camera_width // 2, player_y * tile_size - camera_height // 2, camera_width, camera_height)
+        )
+        surface.blit(camera, (0,0))
+
 
 class GameWorld:
     """

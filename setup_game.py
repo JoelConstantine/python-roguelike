@@ -9,12 +9,15 @@ from typing import Optional
 
 import tcod
 
+from pygame.surface import Surface
+
 import color
 from engine import Engine
 import entity_factories
 from game_map import GameWorld
 import input_handlers
 from procgen import generate_dungeon
+
 
 # Load the background image and remove the alpha channel
 background_image = tcod.image.load("menu_background.png")[:, :, :3]
@@ -104,6 +107,9 @@ class MainMenu(input_handlers.BaseEventHandler):
                 alignment=tcod.CENTER,
                 bg_blend=tcod.BKGND_ALPHA(64)
             )
+    
+    def render_pygame(self, surface: Surface) -> None:
+        pass
     
     def ev_keydown(
         self, event: tcod.event.KeyDown

@@ -6,6 +6,8 @@ from typing import Callable, Optional, Tuple, TYPE_CHECKING, Union
 
 import tcod
 
+from pygame.surface import Surface
+
 import actions
 from actions import (
     Action, 
@@ -156,6 +158,10 @@ class EventHandler(BaseEventHandler):
 
     def on_render(self, console: tcod.Console) -> None:
         self.engine.render(console)
+        
+
+    def render_pygame(self, surface: Surface) -> None:
+        self.engine.render_pygame(surface)
 
 class MainGameEventHandler(EventHandler):
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:

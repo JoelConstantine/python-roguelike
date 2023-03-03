@@ -8,6 +8,10 @@ from tcod.console import Console
 from tcod.map import compute_fov
 
 
+import pygame
+
+
+
 import exceptions
 from message_log import MessageLog
 import render_functions
@@ -15,6 +19,7 @@ import render_functions
 if TYPE_CHECKING:
     from entity import Actor
     from game_map import GameMap, GameWorld
+    from render.renderer import Renderer
 
 
 class Engine:
@@ -45,7 +50,7 @@ class Engine:
         # If a tile is "visible" it should be added to "explored"
         self.game_map.explored |= self.game_map.visible
 
-    def render(self, console: Console,) -> None:
+    def render(self, console: Console) -> None:
         self.game_map.render(console)
 
         self.message_log.render(console=console, x=21, y=45, width=40, height=5)
@@ -65,6 +70,21 @@ class Engine:
             location=(0,47)
         )
         
+    def render_pygame(self, surface: pygame.Surface) -> None:
+        self.game_map.render_window(surface)
+
+        render_functions.render_inventory(
+            surface=surface, 
+            width=350, 
+            location=(surface.get_width() - 350, 0),
+            inventory=self.player.inventory
+        )
+
+        
+        render_functions.render_mouse(surface=surface,filename="mouse cursor.png")
+
+        
+
     def save_as(self, filename: str) -> None:
         """Save this engine instance as a compressed file"""
         save_data = lzma.compress(pickle.dumps(self))

@@ -4,10 +4,15 @@ from typing import Tuple, TYPE_CHECKING
 
 import color
 
+import pygame
+
 if TYPE_CHECKING:
     from tcod import Console
     from engine import Engine
     from game_map import GameMap
+    from components.inventory import Inventory
+
+
 
 def get_names_at_location(x: int, y: int, game_map: GameMap) -> str:
     if not game_map.in_bounds(x, y) or not game_map.visible[x, y]:
@@ -52,3 +57,36 @@ def render_names_at_mouse_location(
     )
 
     console.print(x=x, y=y, string=names_at_mouse_location)
+
+
+
+####### PYGAME
+
+def load_image(name, colorkey=None, scale=1):
+    image = pygame.image.load(name).convert()
+
+    size = image.get_size()
+    size = (size[0] * scale, size[1] * scale)
+    image = pygame.transform.scale(image, size)
+
+    if colorkey is not None:
+        if colorkey == -1:
+            colorkey = image.get_at((0,0))
+        image.set_colorkey(colorkey, pygame.RLEACCEL)
+    return image, image.get_rect()
+
+
+
+def render_inventory(
+    surface: pygame.Surface, width: int, location: Tuple[int, int], inventory: Inventory = None
+) -> None:
+    inventory_surface = pygame.Surface((width, 640))
+    inventory_surface.fill((0,0,255))
+    surface.blit(inventory_surface, location)
+
+def render_mouse(
+    surface: pygame.Surface,  filename: str = "",
+) -> None:
+    mouse_cursor, rect = load_image(name="mouse cursor.png", colorkey=(255,0,255), scale=2)
+    mouse_pos = pygame.mouse.get_pos()
+    surface.blit(mouse_cursor, mouse_pos)

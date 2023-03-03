@@ -33,7 +33,8 @@ class Entity:
         color: Tuple[int, int, int] = (255,255,255),
         name: str = "<Unnamed>",
         blocks_movement: bool = False,
-        render_order: RenderOrder = RenderOrder.CORPSE
+        render_order: RenderOrder = RenderOrder.CORPSE,
+        sprite: str = ""
     ):
         self.x = x
         self.y = y
@@ -42,6 +43,7 @@ class Entity:
         self.name = name
         self.blocks_movement = blocks_movement
         self.render_order = render_order
+        self.sprite = sprite
         if parent:
             # If parent isn't provided now then it will be set later
             self.parent = parent
@@ -101,7 +103,8 @@ class Actor(Entity):
         equipment: Equipment,
         fighter: Fighter,
         inventory: Inventory,
-        level: Level
+        level: Level,
+        sprite: str = ""
     ):
         super().__init__(
             x=x,
@@ -110,7 +113,8 @@ class Actor(Entity):
             color=color,
             name=name,
             blocks_movement=True,
-            render_order=RenderOrder.ACTOR
+            render_order=RenderOrder.ACTOR,
+            sprite=sprite
         )
 
         self.ai: Optional[BaseAi] = ai_cls(self)
@@ -142,7 +146,8 @@ class Item(Entity):
         color: Tuple[int, int, int] = (255,255,255),
         name: str="<Unnamed>",
         consumable: Optional[Consumable] = None,
-        equippable: Optional[Equippable] = None
+        equippable: Optional[Equippable] = None,
+        sprite: str = ""
     ):
         super().__init__(
             x=x,
@@ -151,7 +156,8 @@ class Item(Entity):
             color=color,
             name=name,
             blocks_movement=False,
-            render_order=RenderOrder.ITEM
+            render_order=RenderOrder.ITEM,
+            sprite=sprite
         )
         
         self.consumable = consumable
