@@ -18,6 +18,7 @@ from game_map import GameWorld
 import input_handlers
 from procgen import generate_dungeon
 
+from render_functions import load_image
 
 # Load the background image and remove the alpha channel
 background_image = tcod.image.load("menu_background.png")[:, :, :3]

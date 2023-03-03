@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from game_map import GameMap
     from components.inventory import Inventory
 
-
+mouse_cursor: pygame.Surface = None
 
 def get_names_at_location(x: int, y: int, game_map: GameMap) -> str:
     if not game_map.in_bounds(x, y) or not game_map.visible[x, y]:
@@ -75,18 +75,39 @@ def load_image(name, colorkey=None, scale=1):
         image.set_colorkey(colorkey, pygame.RLEACCEL)
     return image, image.get_rect()
 
+## Renders
+def render_healthbar(
+        currentValue: int, totalValue: int, width: int, height: int, 
+) -> pygame.Surface:
+    hb_srf = pygame.Surface((width, 75))
 
+    hb_rect = pygame.Rect(1,1,width-2, height-2)
+    black=(0,0,0)
+    off_white=(255,225,225)
 
+    percent = currentValue / totalValue
+    hb_width = (width-6) * percent
+
+    hb_srf.fill(black)
+    hb_srf.fill(off_white, hb_rect)
+
+    hb_srf.fill(black, pygame.Rect(2,2,width-4,height-4))
+
+    hb_srf.fill(off_white, pygame.Rect(3,3, hb_width, height-6))
+    return hb_srf
+   
 def render_inventory(
-    surface: pygame.Surface, width: int, location: Tuple[int, int], inventory: Inventory = None
+    width: int, inventory: Inventory = None
 ) -> None:
     inventory_surface = pygame.Surface((width, 640))
     inventory_surface.fill((0,0,255))
-    surface.blit(inventory_surface, location)
+    return inventory_surface
 
 def render_mouse(
-    surface: pygame.Surface,  filename: str = "",
-) -> None:
-    mouse_cursor, rect = load_image(name="mouse cursor.png", colorkey=(255,0,255), scale=2)
-    mouse_pos = pygame.mouse.get_pos()
-    surface.blit(mouse_cursor, mouse_pos)
+    filename: str
+) -> pygame.Surface:
+    global mouse_cursor
+    if mouse_cursor is None:
+        img, rect = load_image(name=filename, colorkey=(255,0,255), scale=2)
+        mouse_cursor = img
+    return mouse_cursor

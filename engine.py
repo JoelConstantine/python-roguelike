@@ -19,7 +19,7 @@ import render_functions
 if TYPE_CHECKING:
     from entity import Actor
     from game_map import GameMap, GameWorld
-    from render.renderer import Renderer
+    
 
 
 class Engine:
@@ -73,15 +73,27 @@ class Engine:
     def render_pygame(self, surface: pygame.Surface) -> None:
         self.game_map.render_window(surface)
 
-        render_functions.render_inventory(
-            surface=surface, 
+        inventory = render_functions.render_inventory(
             width=350, 
-            location=(surface.get_width() - 350, 0),
             inventory=self.player.inventory
         )
 
+        health_bar = render_functions.render_healthbar(
+            currentValue=self.player.fighter.hp,
+            totalValue=self.player.fighter.max_hp,
+            width=250,
+            height=35,
+        )
         
-        render_functions.render_mouse(surface=surface,filename="mouse cursor.png")
+        mouse_cursor = render_functions.render_mouse(filename="mouse cursor.png")
+
+        surface.blits([
+            (inventory, (surface.get_width() - 350, 0)),
+            (health_bar, (3,643)),
+            (mouse_cursor, pygame.mouse.get_pos())
+        ])
+
+        # 
 
         
 
