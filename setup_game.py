@@ -8,20 +8,28 @@ import traceback
 from typing import Optional
 
 import tcod
-
-from pygame.surface import Surface
+import pygame
 
 import color
 from engine import Engine
 import entity_factories
 from game_map import GameWorld
 import input_handlers
+import input_pygame
+
+from game_surface import GameSurface
+
+from input_handlers import BaseEventHandler
+
+import event_handlers.base_event_handler
+
 from procgen import generate_dungeon
 
-from render_functions import load_image
+from render_functions import load_image, load_tiles
 
 # Load the background image and remove the alpha channel
 background_image = tcod.image.load("menu_background.png")[:, :, :3]
+
 
 def new_game() -> Engine:
     """Return a brand new game session as an Engine instance"""
@@ -35,14 +43,14 @@ def new_game() -> Engine:
     player = copy.deepcopy(entity_factories.player)
     
     engine = Engine(player=player)
-    
+
     engine.game_world = GameWorld(
         engine=engine,
         max_rooms=max_rooms,
         room_min_size=room_min_size,
         room_max_size=room_max_size,
         map_width=map_width,
-        map_height=map_height,
+        map_height=map_height
     )
     
     engine.game_world.generate_floor()
@@ -73,7 +81,17 @@ def load_game(filename: str) -> Engine:
     assert isinstance(engine, Engine)
     return engine
 
-class MainMenu(input_handlers.BaseEventHandler):
+class MainMenu(event_handlers.base_event_handler.BaseEventHandler):
+    def on_render(self, screen: GameSurface):
+        img, rect = load_image("menu_background.png", scale=4)
+        screen.surface.blit(img, (0,0))
+
+    def ev_keydown(self, event: pygame.event.Event):
+        if event.key == pygame.K_n:
+             return event_handlers.base_event_handler.MainGameHandler(new_game())
+
+
+class TCODMainMenu(input_handlers.BaseEventHandler):
     """Handle the main menu rendering and input"""
     
     def on_render(self, console: tcod.Console) -> None:

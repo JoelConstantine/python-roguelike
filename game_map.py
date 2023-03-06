@@ -15,6 +15,7 @@ from render_functions import load_image
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Entity
+    from game_surface import GameSurface
     
 
 class GameMap:
@@ -104,14 +105,15 @@ class GameMap:
                     x=entity.x, y=entity.y, string=entity.char, fg=entity.color
                 )
 
-    def render_window(self, surface: pygame.surface.Surface) -> None:
+    def render_window(self, screen: GameSurface) -> pygame.Surface:
+        tileset = screen.world_tiles.get_tiles()
+        character_sprites = screen.character_sprites.get_tiles()
         scale = 2
-
 
         visible_tiles = np.select(
             condlist=[self.visible, self.explored],
-            choicelist=[self.tiles["filepath"], self.tiles["filepath"]],
-            default=""
+            choicelist=[self.tiles["sprite"], self.tiles["sprite"]],
+            default=-1
         )
 
         player_x = self.engine.player.x
@@ -135,7 +137,6 @@ class GameMap:
     
 
         black = 0, 0, 0
-        surface.fill(black)
         game_map.fill(black)
 
         tile_size = 16 * scale
@@ -144,9 +145,9 @@ class GameMap:
         for x in range(len(visible_tiles)):
              for y in range(len(visible_tiles[x])):
                  current_tile = visible_tiles[x][y]
-                 if current_tile != "":
-                    img, rect = load_image(current_tile, scale=scale)
-                    surface.set_alpha()
+                 if current_tile != -1:
+                    img = tileset[current_tile][0]
+                    img.set_alpha()
                     game_map.blit(img, (x * tile_size, y * tile_size))
 
         entities_sorted_for_rendering = sorted(
@@ -156,8 +157,8 @@ class GameMap:
         for entity in entities_sorted_for_rendering:
             # Only print entities that are in the FOV
             if self.visible[entity.x, entity.y]:
-                if entity.sprite != "":
-                    img, rect = load_image(entity.sprite, colorkey=-1, scale=scale)
+                if entity.sprIdx != -1:
+                    img = character_sprites[entity.sprIdx][0]
                     game_map.blit(img, (entity.x * tile_size, entity.y * tile_size))
 
         camera.fill(black)
@@ -166,7 +167,8 @@ class GameMap:
             (0,0), 
             (player_x * tile_size - camera_width // 2, player_y * tile_size - camera_height // 2, camera_width, camera_height)
         )
-        surface.blit(camera, (0,0))
+        return camera
+        
 
 
 class GameWorld:

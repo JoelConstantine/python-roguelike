@@ -21,7 +21,7 @@ tile_dt = np.dtype(
         ("dark", graphic_dt), # Graphics for when the tile is not in FOV
         ("light", graphic_dt),
         ("filepath", 'S30'), # Graphics for when the tile is in FOV
-        ("sprite", Sprite)
+        ("sprite", int)
     ]
 )
 
@@ -32,7 +32,7 @@ def new_tile(
     dark: Tuple[int, Tuple[int, int, int],  Tuple[int, int, int]],
     light: Tuple[int, Tuple[int, int, int], Tuple[int, int, int]],
     filepath: str,
-    sprite: Sprite = None
+    sprite: int = -1
 ) -> np.ndarray:
     """Helper function for defining individual tile types """
     return np.array((walkable, transparent, dark, light, filepath, sprite), dtype=tile_dt)
@@ -45,7 +45,8 @@ floor = new_tile(
     transparent=True, 
     dark=(ord(" "), (255,255,255), (50,50,150)),
     light=(ord(" "), (255,255,255), (200,100,50)),
-    filepath="ground tile.png"
+    filepath="ground tile.png",
+    sprite=1
 )
 
 wall = new_tile(
@@ -53,7 +54,8 @@ wall = new_tile(
     transparent=False, 
     dark=(ord(" "), (255,255,255), (0,0,100)),
     light=(ord(" "), (255,255,255), (130,110,50)),
-    filepath="dungeon wall.png"
+    filepath="dungeon wall.png",
+    sprite=0
 )
 
 down_stairs = new_tile(

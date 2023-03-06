@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import os
 
-from typing import Callable, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, Optional, Tuple, TypeVar, TYPE_CHECKING, Union
 
 import tcod
 
-from pygame.surface import Surface
+import pygame
 
 import actions
 from actions import (
@@ -22,6 +22,8 @@ import exceptions
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Item
+
+T = TypeVar("T")
 
 MOVE_KEYS = {
     # Arrow keys.
@@ -160,7 +162,7 @@ class EventHandler(BaseEventHandler):
         self.engine.render(console)
         
 
-    def render_pygame(self, surface: Surface) -> None:
+    def render_pygame(self, surface: pygame.Surface) -> None:
         self.engine.render_pygame(surface)
 
 class MainGameEventHandler(EventHandler):

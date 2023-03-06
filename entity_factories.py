@@ -15,7 +15,7 @@ player = Actor(
     fighter=Fighter(hp=30, base_defense=1, base_power=2),
     inventory=Inventory(capacity=26),
     level=Level(level_up_base=200),
-    sprite="character sprite.png"
+    sprIdx=0
 )
 
 orc = Actor(
@@ -27,7 +27,7 @@ orc = Actor(
     fighter=Fighter(hp=10, base_defense=0, base_power=3),
     inventory=Inventory(capacity=0),
     level=Level(xp_given=35),
-    sprite="orc sprite.png"
+    sprIdx=1
 )
 
 troll = Actor(
@@ -46,7 +46,6 @@ health_potion = Item(
     color=(127, 0, 255),
     name="Health Potion",
     consumable=consumable.HealingConsumable(amount=4),
-    sprite="health potion.png"
 )
 
 lightning_scroll = Item(

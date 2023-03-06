@@ -19,7 +19,7 @@ import render_functions
 if TYPE_CHECKING:
     from entity import Actor
     from game_map import GameMap, GameWorld
-    
+    from game_surface import GameSurface
 
 
 class Engine:
@@ -70,8 +70,8 @@ class Engine:
             location=(0,47)
         )
         
-    def render_pygame(self, surface: pygame.Surface) -> None:
-        self.game_map.render_window(surface)
+    def render_pygame(self, screen: GameSurface) -> None:
+        camera = self.game_map.render_window(screen)
 
         inventory = render_functions.render_inventory(
             width=350, 
@@ -87,15 +87,12 @@ class Engine:
         
         mouse_cursor = render_functions.render_mouse(filename="mouse cursor.png")
 
-        surface.blits([
-            (inventory, (surface.get_width() - 350, 0)),
+        screen.surface.blits([
+            (camera, (0,0)),
+            (inventory, (screen.surface.get_width() - 350, 0)),
             (health_bar, (3,643)),
             (mouse_cursor, pygame.mouse.get_pos())
-        ])
-
-        # 
-
-        
+        ])        
 
     def save_as(self, filename: str) -> None:
         """Save this engine instance as a compressed file"""

@@ -3,26 +3,29 @@
 
 import traceback
 
-import tcod
-
 import os, pygame
 
 import color
 import exceptions
-import input_handlers
+
 import setup_game
 
-def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
+import event_handlers.base_event_handler
+
+from game_surface import GameSurface
+
+def save_game(handler: event_handlers.base_event_handler.BaseEventHandler, filename: str) -> None:
     """If the current event handler has an active Engine then save it"""
-    if isinstance(handler, input_handlers.EventHandler):
+    if isinstance(handler, event_handlers.base_event_handler.ActionInputHandler):
         handler.engine.save_as(filename)
         print("Game saved")
 
-def main() -> None:
 
+
+def main() -> None:
     pygame.init()
-    screen = pygame.display.set_mode((1280,800), pygame.SCALED)
-    pygame.display.set_caption("TESTING")
+    #screen = pygame.display.set_mode((1280,800), pygame.SCALED)
+   # pygame.display.set_caption("TESTING")
 
     # Setup initial variables for the game
     screen_width = 80
@@ -30,61 +33,57 @@ def main() -> None:
 
     # tiles x = 40, y = 30
 
-    # Load the provided tileset
-    tileset = tcod.tileset.load_tilesheet(
-        "dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
+    screen = GameSurface(
+        width=1280,
+        height=800
     )
+    screen.load_tile_sheet("images/basic tilesheet.png")
+    screen.load_character_sheet("images/character sprite sheet.png")
+    # Load the provided tileset
+    # tileset = tcod.tileset.load_tilesheet(
+    #     "dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
+    # )
     
-    handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
-    
-    # Create a new tcod tutorial with our settings and tileset, begin the gameloop
-    with tcod.context.new_terminal(
-        screen_width,
-        screen_height,
-        tileset=tileset,
-        title="Yet Another Roguelike Tutorial",
-        vsync=True
-    ) as context:
-        root_console = tcod.Console(screen_width, screen_height, order="F")
-        try:
-            while True:
-                """
-                This is the basic game engine loop
-                
-                First the console is cleared,
-                then the engine's event_handler render its current state
-                
-                Afterwards, the engine then waits for and responds to player input
-                before updating the loop
-                """
-                
-                root_console.clear()
-                handler.on_render(console=root_console)
-                handler.render_pygame(surface=screen)
-                context.present(root_console)
-                pygame.display.flip()
+    handler: event_handlers.base_event_handler = setup_game.MainMenu()
 
-                try:
-                    for event in tcod.event.wait():
-                        context.convert_event(event)
-                        handler = handler.handle_events(event)
-                except exceptions.QuitWithoutSaving:
-                    raise 
-                except Exception: # Handle exceptions in game
-                    traceback.print_exc() # Print erro to stderr
-                    # Then print the error to the message log
-                    if isinstance(handler, input_handlers.EventHandler):
-                        handler.engine.message_log.add_message(traceback.format_exc(), color.error)
-        except exceptions.QuitWithoutSaving:
-            print("System exit")
-            raise 
-        except SystemExit: # Save and quit
-            save_game(handler, "savegame.sav")
-            raise 
-        except BaseException:
-            save_game(handler, "savegame.sav")
-            raise 
+    # screen = pygame.display.set_mode((1280,800), pygame.SCALED)
+    pygame.display.set_caption("DATA CRAWLERS")
+    pygame.mouse.set_visible(False)
+    try:
+        while True:
+            """
+            This is the basic game engine loop
+            
+            First the console is cleared,
+            then the engine's event_handler render its current state
+            
+            Afterwards, the engine then waits for and responds to player input
+            before updating the loop
+            """
+            screen.surface.fill((0,0,0))
+            handler.on_render(screen)
+            pygame.display.flip()
 
+            try:
+                for event in pygame.event.get():
+                    handler = handler.handle_events(event)
+            except exceptions.QuitWithoutSaving:
+                raise 
+            except Exception: # Handle exceptions in game
+                traceback.print_exc() # Print erro to stderr
+                # Then print the error to the message log
+                if isinstance(handler, event_handlers.base_event_handler.ActionInputHandler):
+                    handler.engine.message_log.add_message(traceback.format_exc(), color.error)
+
+    except exceptions.QuitWithoutSaving:
+        print("System exit")
+        raise 
+    except SystemExit: # Save and quit
+        save_game(handler, "savegame.sav")
+        raise 
+    except BaseException:
+        save_game(handler, "savegame.sav")
+        raise 
 
 if __name__ == "__main__":
     main()
