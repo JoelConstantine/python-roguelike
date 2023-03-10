@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, Iterator, Optional, TYPE_CHECKING
+from typing import Iterable, Iterator, Optional, TYPE_CHECKING, Tuple, List
 
 import numpy as np # type: ignore
 from tcod.console import Console
@@ -106,15 +106,13 @@ class GameMap:
                 )
 
     def render_window(self, screen: GameSurface) -> pygame.Surface:
-        tileset = screen.world_tiles.get_tiles()
-        character_sprites = screen.character_sprites.get_tiles()
-        scale = 2
-
-        visible_tiles = np.select(
-            condlist=[self.visible, self.explored],
-            choicelist=[self.tiles["sprite"], self.tiles["sprite"]],
-            default=-1
-        )
+        floor_tileset = screen.get_tileset("basic_floor")
+        character_sprites = screen.get_tileset("characters")
+        inventory_sprites = screen.get_tileset("inventory")
+        floor_sprites = floor_tileset.get_tiles()
+        
+        scale = floor_tileset.scale
+        tile_size = floor_tileset.tile_size * scale
 
         player_x = self.engine.player.x
         player_y = self.engine.player.y
@@ -134,33 +132,46 @@ class GameMap:
         starting_x_index = min([0,  player_x - (window_tile_width // 2)])
         starting_y_index = min([0, player_y - (window_tile_height // 2)])
         
-    
-
         black = 0, 0, 0
         game_map.fill(black)
 
-        tile_size = 16 * scale
-        x_offset = 0
+        tile_sprites: List[Tuple[pygame.Surface, Tuple[int, int]]] = []
 
-        for x in range(len(visible_tiles)):
-             for y in range(len(visible_tiles[x])):
-                 current_tile = visible_tiles[x][y]
-                 if current_tile != -1:
-                    img = tileset[current_tile][0]
-                    img.set_alpha()
-                    game_map.blit(img, (x * tile_size, y * tile_size))
+        with np.nditer(self.tiles, flags=["multi_index"]) as row:
+            for tile in row:
+                tile_x, tile_y = row.multi_index[0], row.multi_index[1]
+                if self.explored[tile_x, tile_y]:
+                    tile_img: pygame.Surface = floor_sprites[tile["sprite"]][0]
+
+                    if not self.visible[tile_x, tile_y]:
+                       tile_img.set_alpha(95)
+                    else:
+                       tile_img.set_alpha()
+                    game_map.blit(tile_img, (tile_x * tile_size, tile_y * tile_size))
+                    
 
         entities_sorted_for_rendering = sorted(
             self.entities, key=lambda x: x.render_order.value
         )
 
+        entity_sprites: List[Tuple[pygame.Surface, Tuple[int, int]]] = []
+
         for entity in entities_sorted_for_rendering:
             # Only print entities that are in the FOV
             if self.visible[entity.x, entity.y]:
                 if entity.sprIdx != -1:
-                    img = character_sprites[entity.sprIdx][0]
-                    game_map.blit(img, (entity.x * tile_size, entity.y * tile_size))
-
+                    if entity.sprite_sheet == "characters":
+                        img = character_sprites.get_sprite(entity.sprIdx)
+                    elif entity.sprite_sheet == "inventory":
+                        img = inventory_sprites.get_sprite(entity.sprIdx)
+                    else:
+                        img = screen.not_implemented[0]
+                    entity_sprites.append((img, (entity.x * tile_size, entity.y * tile_size)))
+                    # game_map.blit(img, (entity.x * tile_size, entity.y * tile_size))
+        
+        game_map.blits(tile_sprites)
+        game_map.blits(entity_sprites)
+  
         camera.fill(black)
         camera.blit(
             game_map, 

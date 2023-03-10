@@ -75,7 +75,8 @@ class Engine:
 
         inventory = render_functions.render_inventory(
             width=350, 
-            inventory=self.player.inventory
+            inventory=self.player.inventory,
+            tile_set=screen.get_tileset("inventory")
         )
 
         health_bar = render_functions.render_healthbar(

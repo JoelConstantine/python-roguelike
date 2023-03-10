@@ -86,9 +86,18 @@ class MainMenu(event_handlers.base_event_handler.BaseEventHandler):
         img, rect = load_image("menu_background.png", scale=4)
         screen.surface.blit(img, (0,0))
 
-    def ev_keydown(self, event: pygame.event.Event):
+    def ev_keydown(self, event: pygame.event.Event) -> Optional[input_handlers.BaseEventHandler]:
         if event.key == pygame.K_n:
-             return event_handlers.base_event_handler.MainGameHandler(new_game())
+            return event_handlers.base_event_handler.MainGameHandler(new_game())
+        elif event.key == pygame.K_c:
+            try:
+                return event_handlers.base_event_handler.MainGameHandler(load_game("savegame.sav"))
+            except FileNotFoundError:
+                return input_handlers.PopupMessage(self, "No saved game to load")
+            except Exception as exc:
+                traceback.print_exc() # Print to stderr
+                return input_handlers.PopupMessage(self, f"Failed to load save:\n{exc}")
+        return None
 
 
 class TCODMainMenu(input_handlers.BaseEventHandler):

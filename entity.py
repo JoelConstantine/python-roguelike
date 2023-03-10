@@ -34,7 +34,8 @@ class Entity:
         name: str = "<Unnamed>",
         blocks_movement: bool = False,
         render_order: RenderOrder = RenderOrder.CORPSE,
-        sprIdx: int = -1
+        sprite_sheet: Optional[str] = None,
+        sprIdx: Optional[int] = -1
     ):
         self.x = x
         self.y = y
@@ -43,6 +44,7 @@ class Entity:
         self.name = name
         self.blocks_movement = blocks_movement
         self.render_order = render_order
+        self.sprite_sheet = sprite_sheet
         self.sprIdx = sprIdx
         if parent:
             # If parent isn't provided now then it will be set later
@@ -104,7 +106,8 @@ class Actor(Entity):
         fighter: Fighter,
         inventory: Inventory,
         level: Level,
-        sprIdx: int = -1
+        sprite_sheet: Optional[str] = None,
+        sprIdx: Optional[int] = -1
     ):
         super().__init__(
             x=x,
@@ -114,6 +117,7 @@ class Actor(Entity):
             name=name,
             blocks_movement=True,
             render_order=RenderOrder.ACTOR,
+            sprite_sheet=sprite_sheet,
             sprIdx=sprIdx
         )
 
@@ -147,6 +151,8 @@ class Item(Entity):
         name: str="<Unnamed>",
         consumable: Optional[Consumable] = None,
         equippable: Optional[Equippable] = None,
+        sprite_sheet: str = None,
+        sprIdx: int = -1
     ):
         super().__init__(
             x=x,
@@ -156,6 +162,8 @@ class Item(Entity):
             name=name,
             blocks_movement=False,
             render_order=RenderOrder.ITEM,
+            sprite_sheet=sprite_sheet,
+            sprIdx=sprIdx
         )
         
         self.consumable = consumable

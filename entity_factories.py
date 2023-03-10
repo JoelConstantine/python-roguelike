@@ -15,6 +15,7 @@ player = Actor(
     fighter=Fighter(hp=30, base_defense=1, base_power=2),
     inventory=Inventory(capacity=26),
     level=Level(level_up_base=200),
+    sprite_sheet="characters",
     sprIdx=0
 )
 
@@ -27,6 +28,7 @@ orc = Actor(
     fighter=Fighter(hp=10, base_defense=0, base_power=3),
     inventory=Inventory(capacity=0),
     level=Level(xp_given=35),
+    sprite_sheet="characters",
     sprIdx=1
 )
 
@@ -38,6 +40,7 @@ troll = Actor(
     equipment=Equipment(),
     fighter=Fighter(hp=16, base_defense=1, base_power=4),
     inventory=Inventory(capacity=0),
+    sprite_sheet="characters",
     level=Level(xp_given=100)
 )
 
@@ -46,27 +49,35 @@ health_potion = Item(
     color=(127, 0, 255),
     name="Health Potion",
     consumable=consumable.HealingConsumable(amount=4),
+    sprite_sheet="inventory",
+    sprIdx=0
 )
 
 lightning_scroll = Item(
     char="~",
     color=(255,255,0),
     name="Lightning Scroll",
-    consumable=consumable.LightningDamageConsumable(damage=20,maximum_range=5)
+    consumable=consumable.LightningDamageConsumable(damage=20,maximum_range=5),
+    sprite_sheet="inventory",
+    sprIdx=1
 )
 
 confusion_scroll = Item(
     char="~",
     color=(255, 255, 255),
     name="Confusion Scroll",
-    consumable=consumable.ConfusionConsumable(number_of_turns=10)
+    consumable=consumable.ConfusionConsumable(number_of_turns=10),
+    sprite_sheet="inventory",
+    sprIdx=1
 )
 
 fireball_scroll = Item(
     char="~",
     color=(255, 0, 0),
     name="Fireball Scroll",
-    consumable=consumable.FireballDamageConsumable(damage=12, radius=3)
+    consumable=consumable.FireballDamageConsumable(damage=12, radius=3),
+    sprite_sheet="inventory",
+    sprIdx=1
 )
 
 dagger = Item(

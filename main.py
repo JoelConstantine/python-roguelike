@@ -35,14 +35,27 @@ def main() -> None:
 
     screen = GameSurface(
         width=1280,
-        height=800
+        height=800,
+        base_path="images"
     )
-    screen.load_tile_sheet("images/basic tilesheet.png")
-    screen.load_character_sheet("images/character sprite sheet.png")
-    # Load the provided tileset
-    # tileset = tcod.tileset.load_tilesheet(
-    #     "dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
-    # )
+
+    screen.load_tile_sheet(
+        name="characters", 
+        filepath="character sprite sheet.png", 
+        tile_size=16, 
+        scale=2
+        )
+    screen.load_tile_sheet(
+        name="basic_floor", 
+        filepath="basic tilesheet.png", 
+        tile_size=16, 
+        scale=2)
+    screen.load_tile_sheet(
+        name="inventory",
+        filepath="items sheet.png",
+        tile_size=16,
+        scale=2
+    )
     
     handler: event_handlers.base_event_handler = setup_game.MainMenu()
 

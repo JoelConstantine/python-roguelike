@@ -1,16 +1,19 @@
 from __future__ import annotations
 
-from typing import Tuple, TYPE_CHECKING
+from typing import List, Tuple, TYPE_CHECKING
 
 import color
 
 import pygame
+from game_surface import load_image, load_tiles
+
 
 if TYPE_CHECKING:
     from tcod import Console
     from engine import Engine
     from game_map import GameMap
     from components.inventory import Inventory
+    from game_surface import TileSet
 
 mouse_cursor: pygame.Surface = None
 
@@ -62,31 +65,6 @@ def render_names_at_mouse_location(
 
 ####### PYGAME
 
-def load_image(name, colorkey=None, scale=1):
-    image = pygame.image.load(name).convert()
-
-    size = image.get_size()
-    size = (size[0] * scale, size[1] * scale)
-    image = pygame.transform.scale(image, size)
-
-    if colorkey is not None:
-        if colorkey == -1:
-            colorkey = image.get_at((0,0))
-        image.set_colorkey(colorkey, pygame.RLEACCEL)
-    return image, image.get_rect()
-
-def load_tiles(filename: str, width: int, height: int):
-    image, rect = load_image(filename, scale=2)
-    image_width, image_height = image.get_size()
-    tile_table = []
-    for tile_x in range(0, image_width//width):
-        line = []
-        tile_table.append(line)
-        for tile_y in range(0, image_height//height):
-            rect = (tile_x*width, tile_y*height, width, height)
-            line.append(image.subsurface(rect))
-    return tile_table
-
 ## Renders
 def render_healthbar(
         currentValue: int, totalValue: int, width: int, height: int, 
@@ -109,10 +87,47 @@ def render_healthbar(
     return hb_srf
    
 def render_inventory(
-    width: int, inventory: Inventory = None
+    width: int, inventory: Inventory, tile_set: TileSet,
 ) -> None:
+    grid_size: Tuple[int, int] = (4,8)
+    
+    grid_rect = pygame.Rect((1, 1, 31, 31))
+
     inventory_surface = pygame.Surface((width, 640))
     inventory_surface.fill((0,0,255))
+
+    grid_boxes: List[Tuple[pygame.Surface, Tuple[int,int]]] = []
+
+    inventory_grid = pygame.Surface((grid_size[0] * 32, grid_size[1] * 32))
+
+    gutter_size = 5
+
+    grid_box = pygame.Surface((32,32))
+
+    item_boxes: List[Tuple[pygame.Surface, Tuple[int,int]]] = []
+
+    grid_box.fill((0,0,0))
+    pygame.draw.rect(grid_box, (255,255,255), grid_rect, width=1)
+
+    inventory_index = 0
+
+    for x in range(grid_size[0]):
+        for y in range(grid_size[1]):
+            grid_boxes.append((grid_box, (x * 32 , y * 32)))
+            if inventory_index < len(inventory.items):
+                item = inventory.items[inventory_index]
+                item_img = tile_set.get_sprite(item.sprIdx)
+                item_boxes.append((item_img, (x * 32, y * 32)))
+                inventory_index += 1
+
+    inventory_grid.blits(grid_boxes)
+    inventory_grid.blits(item_boxes)
+    inventory_surface.blit(inventory_grid, (50,50))        
+
+    #for idx, item in enumerate(inventory.items):
+    #   item_img = tile_set.get_sprite(item.sprIdx)
+    # pygame.draw.rect(inventory_surface, (255,255,255), grid_rect, width=1)
+
     return inventory_surface
 
 def render_mouse(
