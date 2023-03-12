@@ -72,11 +72,20 @@ class Engine:
         
     def render_pygame(self, screen: GameSurface) -> None:
         camera = self.game_map.render_window(screen)
+        
 
-        inventory = render_functions.render_inventory(
+        inventory_locations = render_functions.render_inventory(
+            surface=screen.surface,
+            location=(screen.surface.get_width() - 350, 300),
             width=350, 
             inventory=self.player.inventory,
             tile_set=screen.get_tileset("inventory")
+        )
+
+        render_functions.render_box_at_mouse(
+            surface=screen.surface,
+            locations=inventory_locations,
+            engine=self
         )
 
         health_bar = render_functions.render_healthbar(
@@ -90,7 +99,6 @@ class Engine:
 
         screen.surface.blits([
             (camera, (0,0)),
-            (inventory, (screen.surface.get_width() - 350, 0)),
             (health_bar, (3,643)),
             (mouse_cursor, pygame.mouse.get_pos())
         ])        

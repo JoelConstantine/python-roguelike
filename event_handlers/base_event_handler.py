@@ -48,6 +48,14 @@ WAIT_KEYS = {
     pygame.K_CLEAR
 }
 
+ActionOrHandler = Union[Action, "BaseEventHandler"]
+"""An event handler return value which can trigger an action or switch active handlers
+
+If a handler is returned then it will become the active handler for future events.
+If an action is returned it will be attmped and if it's valid then
+MainGameEventHandler will become the active handler
+"""
+
 class BaseEventHandler():
     def handle_events(self, event: pygame.event.Event) -> BaseEventHandler:
         state = self.dispatch(event)
@@ -65,6 +73,8 @@ class BaseEventHandler():
                 return self.ev_keydown(event)
             case pygame.QUIT:
                 return self.ev_quit(event)
+            case pygame.MOUSEBUTTONUP:
+                return self.ev_mousebuttonup(event)
 
     def ev_keydown(self, event: pygame.event.Event) -> Optional[T]:
         """Called when keyboard is pressed down"""        
@@ -74,6 +84,9 @@ class BaseEventHandler():
 
     def ev_mousemotion(self, event: pygame.event.Event) -> Optional[T]:
         """Called when the mouse is moved"""
+
+    def ev_mousebuttonup(sef, event: pygame.event.Event) -> Optional[T]:
+        """Called when the mousebutton is up"""
 
     def on_render(self, screen: GameSurface) -> None:
         raise NotImplementedError()
@@ -158,3 +171,7 @@ class MainGameHandler(ActionInputHandler):
         #     return LookHandler(self.engine)
 
         return action
+
+    def ev_mousebuttonup(sef, event: pygame.event.Event) -> Optional[ActionOrHandler]:
+        
+        return None

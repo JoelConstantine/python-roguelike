@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Tuple, TYPE_CHECKING
+from typing import List, Tuple, TYPE_CHECKING, Optional
 
 import color
 
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from game_map import GameMap
     from components.inventory import Inventory
     from game_surface import TileSet
+    from entity import Item
 
 mouse_cursor: pygame.Surface = None
 
@@ -87,22 +88,17 @@ def render_healthbar(
     return hb_srf
    
 def render_inventory(
-    width: int, inventory: Inventory, tile_set: TileSet,
-) -> None:
+    surface: pygame.Surface, location: Tuple[int, int], width: int, inventory: Inventory, tile_set: TileSet,
+) -> Optional[Tuple[List[pygame.Rect,Item]]]:
     grid_size: Tuple[int, int] = (4,8)
-    
-    grid_rect = pygame.Rect((1, 1, 31, 31))
+    grid_rect = pygame.Rect((0, 0, 34, 34))
 
-    inventory_surface = pygame.Surface((width, 640))
-    inventory_surface.fill((0,0,255))
-
+    location_x, location_y = location
     grid_boxes: List[Tuple[pygame.Surface, Tuple[int,int]]] = []
-
-    inventory_grid = pygame.Surface((grid_size[0] * 32, grid_size[1] * 32))
 
     gutter_size = 5
 
-    grid_box = pygame.Surface((32,32))
+    grid_box = pygame.Surface((34,34))
 
     item_boxes: List[Tuple[pygame.Surface, Tuple[int,int]]] = []
 
@@ -111,24 +107,21 @@ def render_inventory(
 
     inventory_index = 0
 
-    for x in range(grid_size[0]):
-        for y in range(grid_size[1]):
-            grid_boxes.append((grid_box, (x * 32 , y * 32)))
+    for y in range(grid_size[1]):
+        for x in range(grid_size[0]):
             if inventory_index < len(inventory.items):
                 item = inventory.items[inventory_index]
                 item_img = tile_set.get_sprite(item.sprIdx)
-                item_boxes.append((item_img, (x * 32, y * 32)))
+                item_boxes.append((item_img, (gutter_size * x + location_x + x * 34 + 1,gutter_size * y + location_y + y * 34 + 1)))
                 inventory_index += 1
-
-    inventory_grid.blits(grid_boxes)
-    inventory_grid.blits(item_boxes)
-    inventory_surface.blit(inventory_grid, (50,50))        
-
-    #for idx, item in enumerate(inventory.items):
-    #   item_img = tile_set.get_sprite(item.sprIdx)
-    # pygame.draw.rect(inventory_surface, (255,255,255), grid_rect, width=1)
-
-    return inventory_surface
+            grid_boxes.append((grid_box, (gutter_size * x + location_x + x * 34,gutter_size* y + location_y + y * 34)))
+            
+    
+    surface.blits(grid_boxes)
+   
+    inventory_rects =surface.blits(item_boxes)
+    inventory_slots = list(zip(inventory_rects, inventory.items))
+    return inventory_slots
 
 def render_mouse(
     filename: str
@@ -138,3 +131,19 @@ def render_mouse(
         img, rect = load_image(name=filename, colorkey=(255,0,255), scale=2)
         mouse_cursor = img
     return mouse_cursor
+
+def render_box_at_mouse(
+    surface: pygame.Surface,
+    locations: List[Tuple[pygame.Rect, Item]],
+    engine: Engine
+) -> None:
+    mouse_x, mouse_y =  pygame.mouse.get_pos()
+
+    if (mouse_x < 0 or mouse_y < 0 or mouse_x > surface.get_width() or mouse_y > surface.get_height()):
+        return
+    
+    for location in locations:
+        rect = location[0]
+        item = location[1]
+        if rect.left <= mouse_x <= rect.right and rect.top <= mouse_y <= rect.bottom:
+            print(f"Item: {item.name}")
