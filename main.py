@@ -1,5 +1,6 @@
 """All of this is based on the TCOD roguelike tutorial (2020) found at http://rogueliketutorials.com"""
 
+from typing import Dict, Tuple
 
 import traceback
 
@@ -38,6 +39,19 @@ def main() -> None:
         height=800,
         base_path="images"
     )
+
+    floor_tiles: Dict[str, Tuple[int,int,int,int]] = {
+        "wall": (0,0,32,32),
+        "floor": (32,0,32,32)
+    }
+
+    screen.load_defined_tile_sheet(
+        name="first_floor",
+        filepath="basic tilesheet.png",
+        tiles=floor_tiles,
+        scale=2
+    )
+
 
     screen.load_tile_sheet(
         name="characters", 

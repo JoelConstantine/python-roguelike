@@ -1,7 +1,9 @@
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple, Union
 
 import os
 import pygame
+
+
 
 
 def load_image(name, colorkey=None, scale=1):
@@ -17,7 +19,7 @@ def load_image(name, colorkey=None, scale=1):
         image.set_colorkey(colorkey, pygame.RLEACCEL)
     return image, image.get_rect()
 
-def load_tiles(filename: str, width: int, height: int, colorKey=None, scale: int=1):
+def load_tiles(filename: str, width: int, height: int, colorKey=None, scale: int=1) -> List[pygame.Surface]: 
     image, rect = load_image(filename, colorKey, scale)
     image_width, image_height = image.get_size()
     tile_table = []
@@ -28,6 +30,16 @@ def load_tiles(filename: str, width: int, height: int, colorKey=None, scale: int
             rect = (tile_x*width*scale, tile_y*height*scale, width*scale, height*scale)
             line.append(image.subsurface(rect))
     return tile_table
+
+def load_defined_tiles(
+    filename: str, tiles: Dict[str, Tuple[int, int, int, int]], colorKey=None, scale: int=1
+    ) -> Dict[str, pygame.Surface]:
+        image, rect = load_image(filename, colorKey, scale)
+        tile_dict: Dict[str, pygame.Surface] = {}
+        for key, value  in tiles.items():
+            tile_dict[key] = image.subsurface(value)
+            
+        return tile_dict
 
 class Tile():
     def __init__():
@@ -57,6 +69,25 @@ class TileSet():
             sprite = self.not_implemented[0]
         return  sprite
 
+class DefinedTileSet(TileSet):
+    def __init__(
+        self, filename: str, tiles: Dict[str, Tuple[int, int, int, int]], scale: int = 1, colorKey=None
+    ):
+        self.filename = filename
+        self.tiles = tiles
+        self.scale = scale
+        self.sprites = load_defined_tiles(
+            filename=filename, tiles=tiles,  colorKey=colorKey, scale=scale)
+        
+        filepath = os.path.join("images", "not implemented.png")
+        self.not_implemented = load_image(filepath, scale=2)
+        
+    def get_sprite(self, name: str) -> pygame.Surface:
+        print(name, type(name))
+        if not name:
+            return self.not_implemented
+        return self.sprites[name]
+
 class GameSurface():
     def __init__(self, width: int, height: int, base_path: str = "images"):
         self.surface = pygame.display.set_mode((width, height), pygame.SCALED)
@@ -69,9 +100,10 @@ class GameSurface():
     def load_tile_sheet(self, name, filepath, tile_size: int=16, scale: int=1, colorKey=None):
         filepath = os.path.join(self.base_path, filepath)
         self.tilesets[name] = TileSet(filepath, tile_size=tile_size, scale=scale, colorKey=colorKey)
+        
+    def load_defined_tile_sheet(self, name: str, filepath: str, tiles: Dict[str, Tuple[int,int,int,int]], scale: int=1, colorKey=None):
+        filepath = os.path.join(self.base_path, filepath)
+        self.tilesets[name] = DefinedTileSet(filepath, tiles=tiles, scale=scale, colorKey=colorKey)
 
-    def get_tileset(self, name) -> TileSet:
+    def get_tileset(self, name) -> Union[TileSet, DefinedTileSet]:
         return self.tilesets[name]
-
-
-
