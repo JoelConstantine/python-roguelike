@@ -106,14 +106,13 @@ class GameMap:
                 )
 
     def render_window(self, screen: GameSurface) -> pygame.Surface:
-        floor_tileset = screen.get_tileset("basic_floor")
         first_floor_tileset = screen.get_tileset("first_floor")
         character_sprites = screen.get_tileset("characters")
         inventory_sprites = screen.get_tileset("inventory")
-        floor_sprites = floor_tileset.get_tiles()
+
         
-        scale = floor_tileset.scale
-        tile_size = floor_tileset.tile_size * scale
+        scale = character_sprites.scale
+        tile_size = character_sprites.tile_size * scale
 
         player_x = self.engine.player.x
         player_y = self.engine.player.y
@@ -142,7 +141,7 @@ class GameMap:
             for tile in row:
                 tile_x, tile_y = row.multi_index[0], row.multi_index[1]
                 if self.explored[tile_x, tile_y]:
-                    # tile_img: pygame.Surface = floor_sprites[tile["sprite"]][0]
+                    
                     spr_name = str(tile["name"])
                     tile_img: pygame.Surface = first_floor_tileset.get_sprite(spr_name)
                     if not self.visible[tile_x, tile_y]:
