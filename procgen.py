@@ -133,7 +133,7 @@ def place_entities(
 
 def tunnel_between(
     start: Tuple[int, int], end: Tuple[int, int]
-) -> Iterator[Tuple[int, int]]:
+) -> Iterator[Tuple[int, int, str]]:
     """Return an L-shaped tunnel between these two points """
     x1, y1 = start
     x2, y2 = end
@@ -143,6 +143,7 @@ def tunnel_between(
     else:
         # Move vertically, then horizontally
         corner_x, corner_y = x1, y2
+ 
 
     # Generate coordinates for this tunnel
     for x, y in tcod.los.bresenham((x1, y1), (corner_x, corner_y)).tolist():
@@ -184,23 +185,89 @@ def generate_dungeon(
         # Dig out this rooms inner area
         dungeon.tiles[new_room.inner] = tile_types.floor
 
-        if len(rooms) == 0:
-            # The first room, where the player starts
-            player.place(*new_room.center, dungeon)
-        else: # All rooms after the first
-            # Dig out a tunnel between this room and the previous room
-            for x, y in tunnel_between(rooms[-1].center, new_room.center):
-                dungeon.tiles[x, y] = tile_types.floor
-            
-            center_of_last_room = new_room.center
+        wall_west = (slice(x, x), slice(y + 1, y + room_height - 1))
+        if not dungeon.tiles[(x,y)]["walkable"]:
+            dungeon.tiles[(x, y)]["name"] = "wall_nw_c"
+        
+        if not dungeon.tiles[(x+room_width, y)]["walkable"]:
+            dungeon.tiles[(x+room_width, y)]["name"] = "wall_ne_c"
+        
+        if not dungeon.tiles[(x, y+room_height)]["walkable"]:
+            dungeon.tiles[(x, y+room_height)]["name"] = "wall_sw_c"
+        if not dungeon.tiles[(x+room_width, y+room_height)]["walkable"]:
+            dungeon.tiles[(x+room_width, y+room_height)]["name"] = "wall_se_c"
+        for y_offset in range(1, room_height):
+            if not dungeon.tiles[(x, y + y_offset)]["walkable"]:
+                dungeon.tiles[(x, y + y_offset)]["name"] = "wall_w"
+            if not dungeon.tiles[(x+room_width, y + y_offset)]["walkable"]:
+                dungeon.tiles[(x+room_width, y + y_offset)]["name"] = "wall_e"
+
+        for x_offset in range(1, room_width):
+            if not dungeon.tiles[(x+x_offset, y + room_height)]["walkable"]:
+                dungeon.tiles[(x+x_offset, y + room_height)]["name"] = "wall_s"
 
         place_entities(new_room, dungeon, engine.game_world.current_floor)
 
-        dungeon.tiles[center_of_last_room] = tile_types.down_stairs
-        dungeon.downstairs_location = center_of_last_room
-
         # Finally, appen the new room to the list
         rooms.append(new_room)
-            
+
+    for idx, room in enumerate(rooms):
+        if idx == 0:
+            player.place(*room.center, dungeon)
+        else:
+            prev_x, prev_y = rooms[idx-1].center
+            for x, y in tunnel_between(rooms[idx-1].center, room.center):
+                dungeon.tiles[x, y] = tile_types.floor
+                
+                if prev_x != x:
+                    # Moving horizontally
+                    if (dungeon.tiles[(x,y+1)] != tile_types.floor):
+                        # check to see if this is a corner
+                        if (dungeon.tiles[x-1, y+1]["walkable"]):
+                            wall_name = "wall_se"
+                        elif (dungeon.tiles[x+1, y+1]["walkable"]):
+                            wall_name = "wall_sw"
+                        else:
+                            wall_name = "wall_s"
+                    
+                        dungeon.tiles[(x,y+1)]["name"] = wall_name
+
+                    if (dungeon.tiles[(x,y-1)]["walkable"] == False):
+                        if (dungeon.tiles[x-1, y-1])["walkable"]:
+                            wall_name = "wall_nw"
+                        elif (dungeon.tiles[x+1, y-1]["walkable"]):
+                            wall_name = "wall_ne"
+                        else:
+                            wall_name = "wall_n"
+
+                        dungeon.tiles[(x,y-1)]["name"] = wall_name
+                    pass
+                elif (prev_y != y):
+                    # Moving vertically
+                    if (dungeon.tiles[(x+1,y)]["walkable"] == False):
+                        if (dungeon.tiles[x+1, y-1]["walkable"]):
+                            wall_name = "wall_se"
+                        elif (dungeon.tiles[x+1, y+1]["walkable"]):
+                            wall_name = "wall_nw"
+                        else:
+                            wall_name = "wall_e"
+
+                        dungeon.tiles[(x+1,y)]["name"] = wall_name
+                    if (dungeon.tiles[(x-1,y)]["walkable"] == False):
+                        if (dungeon.tiles[x-1, y-1]["walkable"]):
+                            wall_name = "wall_sw"
+                        elif (dungeon.tiles[x-1, y+1]["walkable"]):
+                            wall_name = "wall_ne"
+                        else:
+                            wall_name = "wall_w"
+
+                        dungeon.tiles[(x-1,y)]["name"] = wall_name
+                prev_x, prev_y = x,y
+        
+        center_of_last_room = room.center
+
+    dungeon.tiles[center_of_last_room] = tile_types.down_stairs
+    dungeon.downstairs_location = center_of_last_room
+
     return dungeon
 

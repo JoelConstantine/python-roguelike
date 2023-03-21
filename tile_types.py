@@ -49,7 +49,7 @@ wall = new_tile(
     walkable=False, 
     transparent=False, 
 
-    name="wall",
+    name="wall_n",
     sprite=0,
 )
 

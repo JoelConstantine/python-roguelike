@@ -90,15 +90,17 @@ def render_healthbar(
 def render_inventory(
     surface: pygame.Surface, location: Tuple[int, int], width: int, inventory: Inventory, tile_set: TileSet,
 ) -> Optional[Tuple[List[pygame.Rect,Item]]]:
+    item_size = 64
+
     grid_size: Tuple[int, int] = (4,8)
-    grid_rect = pygame.Rect((0, 0, 34, 34))
+    grid_rect = pygame.Rect((0, 0, item_size + 2, item_size + 2))
 
     location_x, location_y = location
     grid_boxes: List[Tuple[pygame.Surface, Tuple[int,int]]] = []
 
     gutter_size = 5
 
-    grid_box = pygame.Surface((34,34))
+    grid_box = pygame.Surface((item_size + 2,item_size + 2))
 
     item_boxes: List[Tuple[pygame.Surface, Tuple[int,int]]] = []
 
@@ -112,9 +114,9 @@ def render_inventory(
             if inventory_index < len(inventory.items):
                 item = inventory.items[inventory_index]
                 item_img = tile_set.get_sprite(item.sprIdx)
-                item_boxes.append((item_img, (gutter_size * x + location_x + x * 34 + 1,gutter_size * y + location_y + y * 34 + 1)))
+                item_boxes.append((item_img, (gutter_size * x + location_x + x * item_size + 2 + 1,gutter_size * y + location_y + y * item_size + 2 + 1)))
                 inventory_index += 1
-            grid_boxes.append((grid_box, (gutter_size * x + location_x + x * 34,gutter_size* y + location_y + y * 34)))
+            grid_boxes.append((grid_box, (gutter_size * x + location_x + x * item_size + 2,gutter_size* y + location_y + y * item_size + 2)))
             
     
     surface.blits(grid_boxes)

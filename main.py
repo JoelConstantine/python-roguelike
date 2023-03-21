@@ -45,30 +45,59 @@ def main() -> None:
         "floor": (32,0,32,32)
     }
 
+    first_floor_tiles: Dict[str, Tuple[int,int,int,int]] = {
+        "wall_se": (0,0,32,32),
+        "wall_s": (32,0,32,32),
+        "wall_sw": (64,0,32,32),
+        "wall_nw_c": (96,0,32,32),
+        "wall_ne_c": (128,0,32,32), 
+
+        "wall_n": (32,64,32,32),
+        
+        "wall_e": (0,32,32,32),
+        "wall_w": (64,32,32,32),
+        
+        
+        "wall_sw_c": (96,32,32,32),
+        "wall_se_c": (128,32,32,32),
+        "wall_ne": (64,64,32,32),
+        "wall_nw": (0,64,32,32),
+        
+        "floor": (32,32,32,32),
+    }
+
+    character_sheet: Dict[str, Tuple[int,int,int,int]] = {
+        "player": (0,0,32,32)
+    }
+
     screen.load_defined_tile_sheet(
-        name="first_floor",
-        filepath="basic tilesheet.png",
-        tiles=floor_tiles,
+        name="character_sheet",
+        filepath="dc character sheet.png",
+        tiles=character_sheet,
+        colorKey=-1,
         scale=2
     )
 
+    screen.load_defined_tile_sheet(
+        name="first_floor_sheet",
+        filepath="floor_01_sheet.png",
+        tiles=first_floor_tiles,
+        scale=2
+    )
 
     screen.load_tile_sheet(
         name="characters", 
         filepath="character sprite sheet.png", 
         tile_size=16, 
-        scale=2
+        scale=4,
+        colorKey=-1
         )
-    screen.load_tile_sheet(
-        name="basic_floor", 
-        filepath="basic tilesheet.png", 
-        tile_size=16, 
-        scale=2)
     screen.load_tile_sheet(
         name="inventory",
         filepath="items sheet.png",
         tile_size=16,
-        scale=2
+        scale=4,
+        colorKey=-1
     )
     
     handler: event_handlers.base_event_handler = setup_game.MainMenu()
@@ -111,6 +140,8 @@ def main() -> None:
     except BaseException:
         save_game(handler, "savegame.sav")
         raise 
+
+    pygame.quit()
 
 if __name__ == "__main__":
     main()

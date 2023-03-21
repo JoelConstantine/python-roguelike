@@ -106,7 +106,7 @@ class GameMap:
                 )
 
     def render_window(self, screen: GameSurface) -> pygame.Surface:
-        first_floor_tileset = screen.get_tileset("first_floor")
+        first_floor_tileset = screen.get_tileset("first_floor_sheet")
         character_sprites = screen.get_tileset("characters")
         inventory_sprites = screen.get_tileset("inventory")
 
@@ -135,8 +135,6 @@ class GameMap:
         black = 0, 0, 0
         game_map.fill(black)
 
-        tile_sprites: List[Tuple[pygame.Surface, Tuple[int, int]]] = []
-
         with np.nditer(self.tiles, flags=["multi_index"]) as row:
             for tile in row:
                 tile_x, tile_y = row.multi_index[0], row.multi_index[1]
@@ -144,10 +142,14 @@ class GameMap:
                     
                     spr_name = str(tile["name"])
                     tile_img: pygame.Surface = first_floor_tileset.get_sprite(spr_name)
-                    if not self.visible[tile_x, tile_y]:
-                       tile_img.set_alpha(95)
-                    else:
-                       tile_img.set_alpha()
+                    try:
+                        if not self.visible[tile_x, tile_y]:
+                            tile_img.set_alpha(95)
+                        else:
+                            tile_img.set_alpha()
+                    except AttributeError:
+                        print(spr_name, tile)
+                        raise
                     game_map.blit(tile_img, (tile_x * tile_size, tile_y * tile_size))
                     
 
@@ -165,12 +167,13 @@ class GameMap:
                         img = character_sprites.get_sprite(entity.sprIdx)
                     elif entity.sprite_sheet == "inventory":
                         img = inventory_sprites.get_sprite(entity.sprIdx)
+                    elif entity.sprite_sheet == "character_sheet":
+                        img = screen.get_sprite_from_tilesheet("character_sheet", entity.sprite_name)
                     else:
                         img = screen.not_implemented[0]
                     entity_sprites.append((img, (entity.x * tile_size, entity.y * tile_size)))
                     # game_map.blit(img, (entity.x * tile_size, entity.y * tile_size))
         
-        game_map.blits(tile_sprites)
         game_map.blits(entity_sprites)
   
         camera.fill(black)

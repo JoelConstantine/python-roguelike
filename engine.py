@@ -76,7 +76,7 @@ class Engine:
 
         inventory_locations = render_functions.render_inventory(
             surface=screen.surface,
-            location=(screen.surface.get_width() - 350, 300),
+            location=(screen.surface.get_width() - 350, 150),
             width=350, 
             inventory=self.player.inventory,
             tile_set=screen.get_tileset("inventory")

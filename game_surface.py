@@ -37,7 +37,8 @@ def load_defined_tiles(
         image, rect = load_image(filename, colorKey, scale)
         tile_dict: Dict[str, pygame.Surface] = {}
         for key, value  in tiles.items():
-            tile_dict[key] = image.subsurface(value)
+            scaled_value = (value[0] * scale, value[1] * scale, value[2] * scale, value[3] * scale)
+            tile_dict[key] = image.subsurface(scaled_value)
             
         return tile_dict
 
@@ -83,9 +84,8 @@ class DefinedTileSet(TileSet):
         self.not_implemented = load_image(filepath, scale=2)
         
     def get_sprite(self, name: str) -> pygame.Surface:
-        print(name, type(name))
         if not name:
-            return self.not_implemented
+            return self.not_implemented[0]
         return self.sprites[name]
 
 class GameSurface():
@@ -107,3 +107,12 @@ class GameSurface():
 
     def get_tileset(self, name) -> Union[TileSet, DefinedTileSet]:
         return self.tilesets[name]
+
+    def get_sprite_from_tilesheet(self, tilesheet: str, name: str) -> pygame.Surface:
+        if not tilesheet or not name:
+            return self.not_implemented[0]
+        try:
+            sprite = self.get_tileset(tilesheet).get_sprite(name)
+        except Exception:
+            sprite = self.not_implemented[0]
+        return sprite

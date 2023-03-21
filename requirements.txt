@@ -1,5 +1,5 @@
 cffi==1.15.1
-numpy==1.21.4
+numpy==1.24.2
 pycparser==2.21
 tcod==15.0.0
 pygame-ce==2.1.3

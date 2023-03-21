@@ -35,6 +35,7 @@ class Entity:
         blocks_movement: bool = False,
         render_order: RenderOrder = RenderOrder.CORPSE,
         sprite_sheet: Optional[str] = None,
+        sprite_name: Optional[str] = None,
         sprIdx: Optional[int] = -1
     ):
         self.x = x
@@ -46,6 +47,7 @@ class Entity:
         self.render_order = render_order
         self.sprite_sheet = sprite_sheet
         self.sprIdx = sprIdx
+        self.sprite_name = sprite_name
         if parent:
             # If parent isn't provided now then it will be set later
             self.parent = parent
@@ -107,6 +109,7 @@ class Actor(Entity):
         inventory: Inventory,
         level: Level,
         sprite_sheet: Optional[str] = None,
+        sprite_name: Optional[str] = None,
         sprIdx: Optional[int] = -1
     ):
         super().__init__(
@@ -118,7 +121,8 @@ class Actor(Entity):
             blocks_movement=True,
             render_order=RenderOrder.ACTOR,
             sprite_sheet=sprite_sheet,
-            sprIdx=sprIdx
+            sprIdx=sprIdx,
+            sprite_name=sprite_name
         )
 
         self.ai: Optional[BaseAi] = ai_cls(self)

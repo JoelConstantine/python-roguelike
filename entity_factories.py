@@ -15,7 +15,8 @@ player = Actor(
     fighter=Fighter(hp=30, base_defense=1, base_power=2),
     inventory=Inventory(capacity=26),
     level=Level(level_up_base=200),
-    sprite_sheet="characters",
+    sprite_sheet="character_sheet",
+    sprite_name="player",
     sprIdx=0
 )
 
