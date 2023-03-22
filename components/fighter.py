@@ -65,6 +65,7 @@ class Fighter(BaseComponent):
         self.parent.ai = None
         self.parent.name = f"remains of {self.parent.name}"
         self.parent.render_order = RenderOrder.CORPSE
+        self.parent.sprite_name = "tombstone"
         
         self.engine.message_log.add_message(death_message, death_color)
         

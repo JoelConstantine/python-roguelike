@@ -40,11 +40,6 @@ def main() -> None:
         base_path="images"
     )
 
-    floor_tiles: Dict[str, Tuple[int,int,int,int]] = {
-        "wall": (0,0,32,32),
-        "floor": (32,0,32,32)
-    }
-
     first_floor_tiles: Dict[str, Tuple[int,int,int,int]] = {
         "wall_se": (0,0,32,32),
         "wall_s": (32,0,32,32),
@@ -67,7 +62,9 @@ def main() -> None:
     }
 
     character_sheet: Dict[str, Tuple[int,int,int,int]] = {
-        "player": (0,0,32,32)
+        "player": (0,0,32,32),
+        "tombstone": (32,0,32,32),
+        "wretched": (64,0,32,32)
     }
 
     screen.load_defined_tile_sheet(
